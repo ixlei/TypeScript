@@ -107,8 +107,10 @@ namespace ts {
     interface PackageJsonPathFields {
         typings?: string;
         types?: string;
+        typesAlias?: string;
         typesVersions?: MapLike<MapLike<string[]>>;
         main?: string;
+        mainAlias?: string;
         tsconfig?: string;
     }
 
@@ -137,7 +139,7 @@ namespace ts {
         return value;
     }
 
-    function readPackageJsonPathField<K extends "typings" | "types" | "main" | "tsconfig">(jsonContent: PackageJson, fieldName: K, baseDirectory: string, state: ModuleResolutionState): PackageJson[K] | undefined {
+    function readPackageJsonPathField<K extends "typings" | "types" | "typesAlias"| "main" | "mainAlias" | "tsconfig">(jsonContent: PackageJson, fieldName: K, baseDirectory: string, state: ModuleResolutionState): PackageJson[K] | undefined {
         const fileName = readPackageJsonField(jsonContent, fieldName, "string", state);
         if (fileName === undefined) {
             return;
@@ -156,8 +158,10 @@ namespace ts {
     }
 
     function readPackageJsonTypesFields(jsonContent: PackageJson, baseDirectory: string, state: ModuleResolutionState) {
-        return readPackageJsonPathField(jsonContent, "typings", baseDirectory, state)
-            || readPackageJsonPathField(jsonContent, "types", baseDirectory, state);
+        return (
+            readPackageJsonPathField(jsonContent, "typesAlias", baseDirectory, state)
+            || readPackageJsonPathField(jsonContent, "typings", baseDirectory, state)
+            || readPackageJsonPathField(jsonContent, "types", baseDirectory, state));
     }
 
     function readPackageJsonTSConfigField(jsonContent: PackageJson, baseDirectory: string, state: ModuleResolutionState) {
@@ -165,7 +169,7 @@ namespace ts {
     }
 
     function readPackageJsonMainField(jsonContent: PackageJson, baseDirectory: string, state: ModuleResolutionState) {
-        return readPackageJsonPathField(jsonContent, "main", baseDirectory, state);
+        return readPackageJsonPathField(jsonContent, "mainAlias", baseDirectory, state) || readPackageJsonPathField(jsonContent, "main", baseDirectory, state);
     }
 
     function readPackageJsonTypesVersionsField(jsonContent: PackageJson, state: ModuleResolutionState) {
